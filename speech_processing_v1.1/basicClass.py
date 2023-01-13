@@ -22,7 +22,7 @@ class test_train_data(object):
     
 class test_train_dir(object):
     #用于测试或训练数据及处理后的输出地址，路径
-    datasets_dir=r"F:\datasets_speech" #****默认数据集所在的地址，下级文件夹是speech和noise
+    datasets_dir=r"datasets_speech" #****默认数据集所在的地址，下级文件夹是speech和noise
     output_dir=r"output"  #*****************默认输出的地址
     
     write_clean_path=output_dir+r"\clean.wav"

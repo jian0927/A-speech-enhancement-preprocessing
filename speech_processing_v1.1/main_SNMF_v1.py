@@ -46,15 +46,37 @@ args1.maxiter=101
 args1.displayIterN=50
 args1.costfcn="kl"
 
-"""   
+
+#%%
+
+"""   """
 ###单个训练或  多段合并后的训练尝试 多个语音段合并放入
-#applySNMF.loadWav(data1,args1,dirs1,noisyMatchListTrain,listi=0,snr=0) #*读取一个训练数据 单个,2选1
-applySNMF.loadWavRange(data1,args1,dirs1,noisyMatchListTrain,listRange=(0,3),snr=0) #*读取多个合并为一段 2选1
+applySNMF.loadWav(data1,args1,dirs1,noisyMatchListTrain,listi=0,snr=0) #*读取一个训练数据 单个,2选1
+#applySNMF.loadWavRange(data1,args1,dirs1,noisyMatchListTrain,listRange=(0,3),snr=0) #*读取多个合并为一段 2选1 listRange控制读取范围
 W_clean,W_noise=applySNMF.snmfTrain(data1,args1,oldW_clean=np.ones([1,1]),oldW_noise=np.ones([1,1]))
 np.savetxt(fname="W_clean.csv", X=W_clean, fmt="%f",delimiter=",")
 np.savetxt(fname="W_noise.csv", X=W_noise, fmt="%f",delimiter=",")
 ###单个训练或  多段合并后的训练尝试 多个语音段合并放入 end
-"""
+
+
+#%%
+"""   """
+### 单个测试
+W_clean = np.loadtxt(fname="W_clean.csv", dtype=np.float32, delimiter=",")
+W_noise = np.loadtxt(fname="W_noise.csv", dtype=np.float32, delimiter=",")
+
+applySNMF.loadWav(data1,args1,dirs1,noisyMatchListTrain,listi=0,snr=0) #读取一个测试数据
+data1.magnitude_noisy=myVocalCordModel.preprocessVocalCord\
+    (data1.magnitude_noisy,sr=data1.sr,fftSize=args1.fftSize,plotMask=False,A=1,C=1)  #EFF pre-process
+applySNMF.snmfTest(data1,args1,W_clean,W_noise)
+#data1.magnitude_est=myVocalCordModel.preprocessVocalCord\
+#    (data1.magnitude_est,sr=data1.sr,fftSize=args1.fftSize,plotMask=False,A=0.3,C=1) #EFF post-process
+
+applySNMF.synthesizeSpeech(data1,args1,dirs1)
+### 单个测试 end
+myPaint.paintFT(data1.magnitude_est,title="Spectrogram",MoP="M",dbYoN="Y")
+
+#%%
 
 """   
 ### 批量化训练1by1 效果差
@@ -77,22 +99,10 @@ for i in range(listRange[0],listRange[1]):
 """
 
 
-
-"""   
-### 单个测试
-W_clean = np.loadtxt(fname="W_clean.csv", dtype=np.float32, delimiter=",")
-W_noise = np.loadtxt(fname="W_noise.csv", dtype=np.float32, delimiter=",")
-
-applySNMF.loadWav(data1,args1,dirs1,noisyMatchListTrain,listi=0,snr=0) #读取一个测试数据
-applySNMF.snmfTest(data1,args1,W_clean,W_noise)
-applySNMF.synthesizeSpeech(data1,args1,dirs1)
-### 单个测试 end
-"""
+#%%
 
 
-
-
-"""  """
+"""  
 ###批量化测试
 W_clean = np.loadtxt(fname="W_clean.csv", dtype=np.float32, delimiter=",")
 W_noise = np.loadtxt(fname="W_noise.csv", dtype=np.float32, delimiter=",")
@@ -104,7 +114,7 @@ for snr in [0,5,10]:
         applySNMF.measureWav(data1,args1,W_clean,W_noise,dirs1,noisyMatchListTest,\
                        listRange=[0,100],snr=snr,E_D_E=E_D_E,verbose=True,tableName=tableName)
 ###批量化测试 end
-
+"""
 
 
 

@@ -4,7 +4,7 @@ import scipy
 import PaintTestUseEtc as myPaint  #我自己补充的，用于直观展示和比较等
 import basicUse
 
-def preprocessVocalCord(spec,sr=16000,fftSize=1024,plotMask=False):
+def preprocessVocalCord(spec,sr=16000,fftSize=1024,plotMask=False,A=0.3,C=1):
     """
     This is a function of the prominent voiceprint designed with the characteristic 
     of evenly spaced voiceprint by vocal cord vibration
@@ -113,9 +113,9 @@ def preprocessVocalCord(spec,sr=16000,fftSize=1024,plotMask=False):
         
     ####### 下面构建 mask
     singleFev=allfev/theSize[1] #对单个声谱图做模型的拟合处理花费的拟合迭代次数
-    preMask=(modelM*0.3+1)/1.3
+    preMask=(modelM*A+C)/(A+C)
     preMask[preMask<0]=0
-    preMask[preMask>2]=2
+    #preMask[preMask>2]=2
     
 
     

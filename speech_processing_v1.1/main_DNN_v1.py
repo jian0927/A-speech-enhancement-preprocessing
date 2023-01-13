@@ -40,32 +40,39 @@ args1.winWide=512
 args1.fftSize=1024
 args1.renew_all_args()
 
-args1.epochN = 10 #*训练DNN的迭代次数
+args1.epochN = 100 #*训练DNN的迭代次数
 args1.batchN = 256 
 
+#%%
 
-
-"""   
+"""   """
 ### 单个训练
 applyDNN.loadWav(data1,args1,dirs1,noisyMatchListTrain,listi=0,snr=0) #*读取一个训练数据
 #model=keras.models.load_model(data1.PATH_ROOT+"/myDNNModel.h5") #*读取旧的继续训练
 model=applyDNN.getDnnModel(args1)                    #************使用新的来训练(2选1)
 model,info=applyDNN.dnnTrain(data1,args1,model,save=True) #训练DNN
 ### 单个训练 end
-"""
 
 
+#%%
 
 """   """
 ### 单个测试
 model=keras.models.load_model(data1.PATH_ROOT+"/myDNNModel.h5")  
 applyDNN.loadWav(data1,args1,dirs1,noisyMatchListTest,listi=0,snr=0) #读取一个测试数据
 
+data1.magnitude_noisy=myVocalCordModel.preprocessVocalCord\
+    (data1.magnitude_noisy,sr=data1.sr,fftSize=args1.fftSize,plotMask=False,A=1,C=1) #EFF pre-process
 applyDNN.dnnTest(data1,args1,model)
+#data1.magnitude_est=myVocalCordModel.preprocessVocalCord\
+#    (data1.magnitude_est,sr=data1.sr,fftSize=args1.fftSize,plotMask=False,A=0.3,C=1) #EFF post-process
 applyDNN.synthesizeSpeech(data1,args1,dirs1)
 ### 单个测试 end
 
-myPaint.paintFT(data1.magnitude_clean,title="Spectrogram",MoP="M",dbYoN="Y")
+myPaint.paintFT(data1.magnitude_est,title="Spectrogram",MoP="M",dbYoN="Y")
+
+
+#%%
 
 
 """   
