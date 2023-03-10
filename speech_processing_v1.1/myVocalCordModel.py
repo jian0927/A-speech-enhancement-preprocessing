@@ -127,6 +127,47 @@ def preprocessVocalCord(spec,sr=16000,fftSize=1024,plotMask=False,A=0.3,C=1):
     
     return newSpec
 
+def getPitch(magSpec, Fs, p_max=400, p_min=100):
+    """
+    另一套采用倒谱法查找基频的算法
+    通过幅度谱 magSpec, 得到各个帧的基频, 采取倒谱法
+    获取一段音频的基音频率 fp(Hz) = fs/Np 
+    步骤：分帧、hamming窗、倒谱c(n)、求Np
+    Np是倒谱上最大峰值和次峰值之间的采样点数
+    
+    Args:
+        magSpec (ndarray): 音频信号的幅度谱，shape为(N, frames)，N为FFT点数，frames为帧数
+        Fs (int): 采样率
+        p_max : 基音范围内最高 音调
+        p_min : 基音范围内最低 音调
+        
+    Returns:
+        ndarray: 各帧的基频，shape为(frames-1,)
+    """
+    frames = magSpec.shape[1]  # 总帧数
+    LNp = int(np.floor(Fs/p_max))  # 基音周期的范围
+    HNp = int(np.floor(Fs/p_min))   # 基音周期最多可能有多少个采样点数
+    pitchf = np.zeros(frames)
+
+    for m in range(frames):
+        lgS1 = np.log(np.abs(magSpec[:,m]) + np.finfo(float).eps)  # 傅里叶变换后取模,再取对数
+        lgS2 = lgS1[1:]
+        lgS = np.concatenate((lgS1, np.flipud(lgS2)))
+
+        cn = ifft(lgS)  # 得到x(n)的倒谱c(n) 
+        lenc = int(np.ceil(len(cn)/2))  # 圆周共轭,为减少运算取一半
+        if HNp > lenc:
+            HNp = lenc
+        c = cn[LNp:HNp]  # 在合适范围内搜索Np
+        idx = np.argmax(c)  # 搜索出max
+        maxcn = c[idx]
+        if maxcn > 0.08:  # 门限设置为0.08
+            pitchN = LNp + idx
+            pitchf[m] = Fs/pitchN
+
+    return pitchf
+
+
 def remove_silent_frames(x, y, dyn_range, framelen, hop):
     """ Remove silent frames of x and y based on x
     A frame is excluded if its energy is lower than max(energy) - dyn_range
