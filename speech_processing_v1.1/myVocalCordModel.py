@@ -127,6 +127,8 @@ def preprocessVocalCord(spec,sr=16000,fftSize=1024,plotMask=False,A=0.3,C=1):
     
     return newSpec
 
+
+from scipy.fftpack import ifft
 def getPitch(magSpec, Fs, p_max=400, p_min=100):
     """
     另一套采用倒谱法查找基频的算法
