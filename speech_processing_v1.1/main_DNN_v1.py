@@ -66,6 +66,7 @@ data1.magnitude_noisy=myVocalCordModel.preprocessVocalCord\
 applyDNN.dnnTest(data1,args1,model)
 #data1.magnitude_est=myVocalCordModel.preprocessVocalCord\
 #    (data1.magnitude_est,sr=data1.sr,fftSize=args1.fftSize,plotMask=False,A=0.3,C=1) #EFF post-process
+data1.phase_est = data1.phase_noisy
 applyDNN.synthesizeSpeech(data1,args1,dirs1)
 ### 单个测试 end
 
